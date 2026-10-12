@@ -1,0 +1,23 @@
+{
+  "nome": "Ana Exemplo",
+  "linkedin_url": "https://www.linkedin.com/in/ana-exemplo/",
+  "github_user": "usuario-exemplo",
+  "posicionamento": "Operações de logística + análise de dados com Python",
+  "cargos_alvo": [
+    "Analista de Dados Júnior"
+  ],
+  "local": "São Paulo, SP",
+  "temas": [
+    "dados na logística: SQL, indicadores, dashboards",
+    "automação de planilhas com Python"
+  ],
+  "repos_estudo": [
+    "exercicios-curso"
+  ],
+  "pastas_projetos": [],
+  "nunca_citar": [
+    "nomes de clientes e valores internos de empregadores",
+    "credenciais, tokens ou dados pessoais"
+  ],
+  "leitura_navegador": false
+}

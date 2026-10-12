@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.pyc
+
+# Saídas geradas ao rodar com os dados de exemplo
+exemplo/nota.json
+exemplo/historico.jsonl
+exemplo/registro.jsonl
+exemplo/painel/
+exemplo/rascunhos/
+
+# Estado de verdade nunca entra no repositório. Ele mora em ~/.claude/vitrine;
+# estas regras só protegem contra apontar VITRINE_HOME para dentro do projeto.
+/estado/
+/alvo.json
+/perfil.json
+/perfil.anterior.json
+/vagas.json
+/github.json
+/nota.json
+/fatos.md
+/diario.md
+/historico.jsonl
+/registro.jsonl
+/rascunhos/
+/painel/dados/
+/painel/pagina.json
+/painel/github_extra.json
+
+# Segredos
+.env
+*.token

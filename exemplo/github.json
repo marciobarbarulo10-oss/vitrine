@@ -1,0 +1,41 @@
+{
+  "lido_em": "2026-01-05",
+  "usuario": "usuario-exemplo",
+  "nome": "Ana Exemplo",
+  "bio": null,
+  "blog": "https://www.linkedin.com/in/ana-exemplo/",
+  "seguidores": 3,
+  "readme_perfil_chars": 0,
+  "repos": [
+    {
+      "nome": "relatorio-atraso",
+      "url": "https://github.com/usuario-exemplo/relatorio-atraso",
+      "descricao": "Consolida planilhas de rastreamento e mostra o atraso por rota.",
+      "homepage": null,
+      "topicos": [
+        "python",
+        "pandas",
+        "logistica"
+      ],
+      "licenca": null,
+      "linguagem": "Python",
+      "estrelas": 0,
+      "ultimo_push": "2025-12-18",
+      "readme_chars": 2100,
+      "readme_imagem": true
+    },
+    {
+      "nome": "exercicios-curso",
+      "url": "https://github.com/usuario-exemplo/exercicios-curso",
+      "descricao": null,
+      "homepage": null,
+      "topicos": [],
+      "licenca": null,
+      "linguagem": "Python",
+      "estrelas": 0,
+      "ultimo_push": "2025-10-02",
+      "readme_chars": 0,
+      "readme_imagem": false
+    }
+  ]
+}

@@ -1,0 +1,66 @@
+{
+  "lido_em": "2026-01-05",
+  "fonte": "dados fictícios de exemplo",
+  "url": "https://www.linkedin.com/in/ana-exemplo/",
+  "headline": "Analista de Logística | Indicadores de entrega | Automação de planilhas com Python",
+  "sobre": "Trabalho com operação de transporte e uso dados para reduzir atraso de entrega.\n\nMontei em Python um relatório que junta 3 planilhas de rastreamento e mostra o atraso por rota. O fechamento semanal, que levava 4 horas, passou a rodar em 10 minutos.\n\nEstudo SQL e Power BI para migrar para análise de dados.",
+  "local": "São Paulo, Brasil",
+  "foto": true,
+  "banner": false,
+  "conexoes": 180,
+  "seguidores": 190,
+  "recomendacoes": 1,
+  "experiencias": [
+    {
+      "cargo": "Analista de Logística",
+      "empresa": "Transportadora Exemplo",
+      "inicio": "2024-03",
+      "fim": "",
+      "descricao": "Acompanho 400 entregas por semana em 12 rotas.\nAutomatizei em Python o relatório semanal de atraso, que antes era montado à mão em Excel.\nResponsável pelo contato com 6 transportadoras parceiras."
+    },
+    {
+      "cargo": "Assistente de Logística",
+      "empresa": "Distribuidora Exemplo",
+      "inicio": "2022-01",
+      "fim": "2024-02",
+      "descricao": "Conferência de carga e emissão de documentos de transporte."
+    }
+  ],
+  "formacao": [
+    {
+      "curso": "Tecnologia em Logística",
+      "instituicao": "Faculdade Exemplo",
+      "inicio": "2020-02",
+      "fim": "2022-12"
+    }
+  ],
+  "competencias": [
+    "Logística",
+    "Excel",
+    "Python",
+    "Indicadores de desempenho",
+    "Atendimento a transportadoras"
+  ],
+  "competencias_total": 5,
+  "destaques": [],
+  "projetos": [
+    {
+      "nome": "Relatório de atraso por rota",
+      "url": "https://github.com/usuario-exemplo/relatorio-atraso",
+      "descricao": "Script em Python com pandas que consolida planilhas de rastreamento e gera um dashboard em HTML."
+    }
+  ],
+  "certificados": [
+    {
+      "nome": "SQL para Análise de Dados",
+      "emissor": "Plataforma Exemplo",
+      "data": "2025-09"
+    }
+  ],
+  "links_contato": [],
+  "atividade": {
+    "ultimo_post": "2025-12-20",
+    "posts_30d": 1,
+    "comentarios_7d": 0
+  }
+}

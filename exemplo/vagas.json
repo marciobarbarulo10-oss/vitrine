@@ -1,0 +1,144 @@
+{
+  "atualizado_em": "2026-01-05",
+  "fonte": "vagas fictícias de exemplo",
+  "vagas": [
+    {
+      "id": "v1",
+      "titulo": "Analista de Dados Júnior",
+      "empresa": "Empresa A (fictícia)",
+      "url": "https://example.com/vagas/1",
+      "coletada_em": "2026-01-05"
+    },
+    {
+      "id": "v2",
+      "titulo": "Analista de BI Júnior",
+      "empresa": "Empresa B (fictícia)",
+      "url": "https://example.com/vagas/2",
+      "coletada_em": "2026-01-05"
+    },
+    {
+      "id": "v3",
+      "titulo": "Analista de Dados Jr - Logística",
+      "empresa": "Empresa C (fictícia)",
+      "url": "https://example.com/vagas/3",
+      "coletada_em": "2026-01-05"
+    }
+  ],
+  "termos": [
+    {
+      "termo": "SQL",
+      "sinonimos": [],
+      "tipo": "hard",
+      "vagas": [
+        "v1",
+        "v2",
+        "v3"
+      ],
+      "obrigatorio_em": [
+        "v1",
+        "v2",
+        "v3"
+      ]
+    },
+    {
+      "termo": "Python",
+      "sinonimos": [],
+      "tipo": "hard",
+      "vagas": [
+        "v1",
+        "v3"
+      ],
+      "obrigatorio_em": [
+        "v1"
+      ]
+    },
+    {
+      "termo": "Power BI",
+      "sinonimos": [],
+      "tipo": "hard",
+      "vagas": [
+        "v1",
+        "v2"
+      ],
+      "obrigatorio_em": [
+        "v2"
+      ]
+    },
+    {
+      "termo": "Excel",
+      "sinonimos": [],
+      "tipo": "hard",
+      "vagas": [
+        "v2",
+        "v3"
+      ],
+      "obrigatorio_em": [
+        "v3"
+      ]
+    },
+    {
+      "termo": "Dashboards",
+      "sinonimos": [
+        "dashboard"
+      ],
+      "tipo": "hard",
+      "vagas": [
+        "v1",
+        "v2"
+      ],
+      "obrigatorio_em": []
+    },
+    {
+      "termo": "Pandas",
+      "sinonimos": [],
+      "tipo": "hard",
+      "vagas": [
+        "v1"
+      ],
+      "obrigatorio_em": []
+    },
+    {
+      "termo": "Git",
+      "sinonimos": [
+        "GitHub"
+      ],
+      "tipo": "hard",
+      "vagas": [
+        "v1"
+      ],
+      "obrigatorio_em": []
+    },
+    {
+      "termo": "ETL",
+      "sinonimos": [
+        "pipeline de dados"
+      ],
+      "tipo": "hard",
+      "vagas": [
+        "v2"
+      ],
+      "obrigatorio_em": []
+    },
+    {
+      "termo": "Logística",
+      "sinonimos": [
+        "supply chain"
+      ],
+      "tipo": "cargo",
+      "vagas": [
+        "v3"
+      ],
+      "obrigatorio_em": []
+    },
+    {
+      "termo": "Comunicação",
+      "sinonimos": [],
+      "tipo": "soft",
+      "vagas": [
+        "v1",
+        "v2"
+      ],
+      "obrigatorio_em": []
+    }
+  ]
+}

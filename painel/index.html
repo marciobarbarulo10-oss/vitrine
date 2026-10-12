@@ -1,0 +1,928 @@
+<style>
+/* Layout: cabeçalho com duas abas (LinkedIn, GitHub); cada aba é uma coluna de seções com cartões em grade; a rotina e a nota total fecham a página nas duas. */
+.vt-page { max-width: 76rem; margin-inline: auto; display: flex; flex-direction: column; gap: var(--cds-gap-xl, 2.5rem); font-family: var(--font-anthropic-sans); font-size: var(--cds-font-size-body, 0.875rem); color: var(--color-fg); font-variant-numeric: tabular-nums; line-height: 1.5; }
+.vt-page [data-dash-source-state=refreshing] { opacity: .5; transition: opacity var(--cds-dur-slow, .3s); }
+
+.vt-head { display: flex; flex-direction: column; gap: var(--cds-gap-sm, .5rem); }
+.vt-title { margin: 0; font-family: var(--font-anthropic-serif); font-weight: 400; font-size: 2rem; line-height: 1.15; }
+.vt-takeaway { margin: 0; font-size: 1.0625rem; max-width: 46rem; text-wrap: pretty; }
+.vt-takeaway b { font-weight: 600; }
+.vt-meta { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); display: flex; flex-wrap: wrap; gap: .25rem .75rem; align-items: center; }
+.vt-link { color: var(--color-fg); text-decoration: underline; text-underline-offset: 2px; }
+.vt-link:focus-visible, .vt-btn:focus-visible, .vt-tab:focus-visible, .vt-reslink:focus-visible { outline: 2px solid var(--color-fg); outline-offset: 2px; }
+.vt-tabs { display: flex; gap: 1.5rem; border-bottom: 1px solid var(--color-border-line); margin-top: var(--cds-gap-sm, .5rem); }
+.vt-tab { font: inherit; font-size: 1rem; color: var(--color-fg-muted); background: none; border: 0; border-bottom: 2px solid transparent; margin-bottom: -1px; padding: .5rem 0 .625rem; cursor: pointer; display: flex; align-items: baseline; gap: .5rem; }
+.vt-tab:hover { color: var(--color-fg); }
+.vt-tab[aria-selected=true] { color: var(--color-fg); font-weight: 600; border-bottom-color: var(--color-fg); }
+.vt-tab-n { font-size: var(--cds-font-size-caption, .75rem); font-weight: 400; color: var(--color-fg-muted); white-space: nowrap; }
+.vt-btn { font: inherit; font-size: var(--cds-font-size-caption, .75rem); color: var(--color-fg); background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: 999px; padding: .3rem .75rem; cursor: pointer; }
+.vt-btn:hover { border-color: var(--color-fg-muted); }
+.vt-btn[aria-pressed=true] { background: var(--color-fg); color: var(--color-bg); border-color: var(--color-fg); }
+
+.vt-panel { display: flex; flex-direction: column; gap: var(--cds-gap-xl, 2.5rem); }
+.vt-off { display: none; }
+.vt-sec { display: flex; flex-direction: column; gap: var(--cds-gap-md, 1rem); scroll-margin-top: 1rem; }
+.vt-h2 { margin: 0; font-size: var(--cds-font-size-heading, 1rem); font-weight: var(--cds-font-weight-medium, 500); }
+.vt-sub { margin: 0; color: var(--color-fg-muted); max-width: 46rem; }
+.vt-sechead { display: flex; flex-direction: column; gap: .125rem; }
+.vt-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 20rem), 1fr)); gap: var(--cds-gap-md, 1rem); }
+.vt-card { background: var(--color-panel); border: 1px solid var(--color-border-line); border-radius: var(--cds-radius, .5rem); padding: var(--cds-pad-lg, 1.25rem); display: flex; flex-direction: column; gap: var(--cds-gap-md, 1rem); min-width: 0; scroll-margin-top: 1rem; }
+.vt-cardhead { display: flex; flex-direction: column; gap: .125rem; }
+.vt-h3 { margin: 0; font-size: var(--cds-font-size-body, .875rem); font-weight: var(--cds-font-weight-medium, 500); }
+.vt-note { margin: 0; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); }
+
+/* Resumo */
+.vt-resumo { display: grid; grid-template-columns: minmax(5.5rem, max-content) minmax(0, 1fr); gap: .75rem 1.25rem; margin: 0; }
+.vt-res { display: contents; }
+.vt-res dd { margin: 0; overflow-wrap: anywhere; min-width: 2ch; text-wrap: pretty; }
+.vt-res dd b { font-weight: 600; }
+.vt-reslink { font: inherit; font-weight: 600; color: var(--color-fg); background: none; border: 0; padding: 0; cursor: pointer; text-align: left; text-decoration: underline; text-underline-offset: 2px; }
+
+/* Nota */
+.vt-score { display: flex; align-items: baseline; gap: .5rem; flex-wrap: wrap; }
+.vt-total { font-family: var(--font-anthropic-serif); font-weight: 400; font-size: clamp(3rem, 9vw, 4.25rem); line-height: 1; min-width: 2ch; display: inline-block; }
+.vt-of { color: var(--color-fg-muted); }
+.vt-cats { display: flex; flex-direction: column; gap: .875rem; }
+.vt-cat { display: flex; flex-direction: column; gap: .3rem; }
+.vt-cat-top { display: flex; justify-content: space-between; gap: 1rem; align-items: baseline; }
+.vt-cat-val { color: var(--color-fg-muted); white-space: nowrap; }
+.vt-cat-val .vt-strong { color: var(--color-fg); font-weight: 600; }
+.vt-cat-note { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); overflow-wrap: anywhere; }
+.vt-bar { height: .5rem; border-radius: 999px; background: var(--cds-chart-grid, var(--color-border-line)); overflow: hidden; }
+.vt-bar > i { display: block; height: 100%; border-radius: inherit; }
+.vt-bar.vt-thin { height: .3rem; margin-top: .3rem; min-width: 3.5rem; }
+.vt-chart { position: relative; }
+.vt-trend { min-height: 200px; }
+.vt-commits { min-height: 180px; }
+.vt-tick { font-size: 11px; fill: var(--color-fg-muted); }
+.vt-endlabel { font-size: 12px; font-weight: 600; fill: var(--color-fg); }
+.vt-tip { position: absolute; transform: translate(-50%, -100%); background: var(--cds-surface-popover, var(--color-panel)); border: 1px solid var(--cds-border, var(--color-border-line)); border-radius: var(--cds-radius, .5rem); box-shadow: var(--cds-shadow-popover, 0 4px 16px rgba(0,0,0,.16)); padding: var(--cds-pad-xs, .375rem) var(--cds-pad-sm, .625rem); font-size: var(--cds-font-size-caption, .75rem); pointer-events: none; white-space: nowrap; display: none; z-index: 2; }
+.vt-tip.vt-on { display: block; }
+.vt-tip-d { color: var(--cds-text-secondary, var(--color-fg-muted)); }
+
+/* Rotina */
+.vt-week { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 8.75rem), 1fr)); gap: var(--cds-gap-sm, .5rem); }
+.vt-day { border: 1px solid var(--color-border-line); border-radius: var(--cds-radius, .5rem); padding: .75rem; display: flex; flex-direction: column; gap: .25rem; background: var(--color-panel); min-width: 0; }
+.vt-day-top { display: flex; justify-content: space-between; align-items: center; gap: .5rem; color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); text-transform: uppercase; letter-spacing: .06em; }
+.vt-day-name { font-weight: 600; font-size: var(--cds-font-size-body, .875rem); }
+.vt-day-what { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); }
+.vt-hoje { display: none; text-transform: none; letter-spacing: 0; background: var(--color-fg); color: var(--color-bg); border-radius: 999px; padding: 0 .5rem; font-weight: 600; }
+.vt-today { border-color: var(--color-fg); box-shadow: inset 0 0 0 1px var(--color-fg); }
+.vt-today .vt-hoje { display: inline-block; }
+
+/* Correções */
+.vt-fixes { display: flex; flex-direction: column; }
+.vt-fix { display: grid; grid-template-columns: 3.75rem minmax(0, 1fr); gap: .25rem .875rem; padding-block: .875rem; border-top: 1px solid var(--color-border-line); }
+.vt-fix:first-child { border-top: 0; padding-top: 0; }
+.vt-fix:last-child { padding-bottom: 0; }
+.vt-gain { font-family: var(--font-anthropic-serif); font-size: 1.5rem; line-height: 1.2; white-space: nowrap; }
+.vt-fix-body { display: flex; flex-direction: column; gap: .25rem; min-width: 0; }
+.vt-fix-title { display: flex; flex-wrap: wrap; gap: .25rem .625rem; align-items: baseline; font-weight: 600; }
+.vt-pill { display: inline-block; font-size: var(--cds-font-size-caption, .75rem); font-weight: 400; color: var(--color-fg-muted); border: 1px solid var(--color-border-line); border-radius: 999px; padding: 0 .5rem; white-space: nowrap; }
+.vt-fix-text { margin: 0; color: var(--color-fg-muted); overflow-wrap: anywhere; }
+.vt-fix-how { margin: 0; overflow-wrap: anywhere; }
+
+/* Fichas e tabelas */
+.vt-stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(7.5rem, 1fr)); gap: 1rem 1.25rem; margin: 0; }
+.vt-stat { display: flex; flex-direction: column; gap: .125rem; min-width: 0; }
+.vt-stat dt { color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); order: 2; }
+.vt-stat dd { margin: 0; font-family: var(--font-anthropic-serif); font-size: 1.5rem; line-height: 1.2; order: 1; min-width: 2ch; }
+.vt-facts { display: grid; grid-template-columns: minmax(6rem, max-content) minmax(0, 1fr); gap: .5rem 1rem; margin: 0; }
+.vt-facts dt { color: var(--color-fg-muted); }
+.vt-facts dd { margin: 0; overflow-wrap: anywhere; min-width: 2ch; }
+.vt-quote { margin: 0; padding-left: .875rem; border-left: 2px solid var(--color-border-line); overflow-wrap: anywhere; }
+.vt-tablebox { overflow: auto; max-height: 30rem; border: 1px solid var(--color-border-line); border-radius: var(--cds-radius, .5rem); background: var(--color-panel); }
+.vt-table { border-collapse: collapse; width: 100%; font-size: var(--cds-font-size-body, .875rem); }
+.vt-table th { position: sticky; top: 0; background: var(--color-panel); text-align: left; font-weight: var(--cds-font-weight-medium, 500); color: var(--color-fg-muted); font-size: var(--cds-font-size-caption, .75rem); padding: .625rem .75rem; border-bottom: 1px solid var(--color-border-line); white-space: nowrap; z-index: 1; }
+.vt-table td { padding: .625rem .75rem; border-bottom: 1px solid var(--color-border-line); vertical-align: top; }
+.vt-table tr:last-child td { border-bottom: 0; }
+.vt-table .vt-n { text-align: right; white-space: nowrap; }
+.vt-table .vt-wide { min-width: 16rem; }
+.vt-table .vt-mid { min-width: 11rem; }
+.vt-table .vt-nowrap { white-space: nowrap; }
+.vt-table .vt-dim td { color: var(--color-fg-muted); }
+.vt-bad { color: var(--color-bad); }
+.vt-warn { color: var(--color-warn); }
+.vt-ok { color: var(--color-ok); }
+.vt-filters { display: flex; flex-wrap: wrap; gap: var(--cds-gap-xs, .375rem); align-items: center; }
+</style>
+
+<div class="vt-page">
+
+  <header class="vt-head">
+    <h1 class="vt-title">Vitrine</h1>
+    <p class="vt-takeaway">—</p>
+    <p class="vt-meta">
+      <span>Medição de <span class="vt-auto dash-skeleton" data-source="nota" data-field="data" data-row="0">—</span></span>
+      <span>A rotina roda todo dia, pela tarefa agendada</span>
+      <a class="vt-link vt-ln-link" target="_blank" rel="noopener">Abrir o LinkedIn</a>
+      <a class="vt-link vt-gh-link" target="_blank" rel="noopener">Abrir o GitHub</a>
+    </p>
+    <div class="vt-tabs" role="tablist" aria-label="Visualização">
+      <button class="vt-tab" role="tab" type="button" id="tab-linkedin" data-view="linkedin" aria-controls="linkedin" aria-selected="true">LinkedIn <span class="vt-tab-n"><span class="vt-auto" data-source="nota_canais" data-field="pontos" data-where="canal=linkedin">—</span> de <span class="vt-auto" data-source="nota_canais" data-field="max" data-where="canal=linkedin">—</span></span></button>
+      <button class="vt-tab" role="tab" type="button" id="tab-github" data-view="github" aria-controls="github" aria-selected="false">GitHub <span class="vt-tab-n"><span class="vt-auto" data-source="nota_canais" data-field="pontos" data-where="canal=github">—</span> de <span class="vt-auto" data-source="nota_canais" data-field="max" data-where="canal=github">—</span></span></button>
+    </div>
+  </header>
+
+  <!-- ============================== LinkedIn ============================== -->
+  <div class="vt-panel" id="linkedin" role="tabpanel" aria-labelledby="tab-linkedin">
+
+    <section class="vt-sec" id="ln-resumo">
+      <div class="vt-card">
+        <div class="vt-cardhead">
+          <h2 class="vt-h3">Resumo do LinkedIn</h2>
+          <p class="vt-note">O essencial de cada seção. O nome à esquerda leva até ela.</p>
+        </div>
+        <dl class="vt-resumo">
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-nota">Nota</button></dt><dd class="vt-r-nota dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-correcoes">Correções</button></dt><dd class="vt-r-correcoes dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-perfil">Perfil</button></dt><dd class="vt-r-perfil dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-atividade">Atividade</button></dt><dd class="vt-r-atividade dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-vagas">Vagas</button></dt><dd class="vt-r-vagas dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="ln-checagens">Checagens</button></dt><dd class="vt-r-checagens dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="rotina">Rotina</button></dt><dd class="vt-r-rotina dash-skeleton">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="ln-nota">
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead">
+            <h2 class="vt-h3">Nota do LinkedIn</h2>
+            <p class="vt-note">A parte da nota que se resolve dentro do LinkedIn. A nota total é <span class="vt-auto" data-source="nota_total">—</span> de 100.</p>
+          </div>
+          <div class="vt-score"><span class="vt-total vt-auto dash-skeleton" data-source="nota_canais" data-field="pontos" data-where="canal=linkedin">—</span><span class="vt-of">de <span class="vt-auto" data-source="nota_canais" data-field="max" data-where="canal=linkedin">—</span> pontos</span></div>
+          <div class="vt-cats vt-grupos" data-source="nota_grupos"></div>
+        </div>
+        <div class="vt-card" id="ln-correcoes">
+          <div class="vt-cardhead">
+            <h2 class="vt-h3">O que mais sobe a nota no LinkedIn</h2>
+            <p class="vt-note">As checagens com mais pontos em aberto. O número é quanto a nota sobe se a checagem for resolvida por inteiro.</p>
+          </div>
+          <div class="vt-fixes" data-source="perdas checagens"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="ln-perfil">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Perfil e atividade</h2>
+        <p class="vt-sub">Retrato do perfil, lido na segunda-feira com o navegador logado, só leitura. Lido em <span class="vt-auto" data-source="linkedin" data-field="lido_em" data-row="0">—</span>.</p>
+      </div>
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Perfil</h3><p class="vt-note">O título e o que o perfil já mostra.</p></div>
+          <p class="vt-quote vt-auto dash-skeleton" data-source="linkedin" data-field="headline" data-row="0">—</p>
+          <dl class="vt-stats">
+            <div class="vt-stat"><dt>Conexões</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="conexoes" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Seguidores</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="seguidores" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Recomendações</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="recomendacoes" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Competências</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="competencias" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Itens em Destaques</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="destaques" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Projetos com link</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="projetos" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Certificados</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="certificados" data-row="0">—</dd></div>
+          </dl>
+        </div>
+        <div class="vt-card" id="ln-atividade">
+          <div class="vt-cardhead"><h3 class="vt-h3">Atividade</h3><p class="vt-note">O que você publicou e o alcance dos últimos 7 dias.</p></div>
+          <dl class="vt-stats">
+            <div class="vt-stat"><dt>Último post próprio</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="ultimo_post" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Posts em 30 dias</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="posts_30d" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Comentários em 7 dias</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="comentarios_7d" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Visualizações do perfil, 7 dias</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="visualizacoes_perfil_7d" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Impressões de posts, 7 dias</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="impressoes_posts_7d" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Aparições em busca, 7 dias</dt><dd class="vt-auto dash-skeleton" data-source="linkedin" data-field="aparicoes_em_busca_7d" data-row="0">—</dd></div>
+          </dl>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="ln-vagas">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Aderência às vagas</h2>
+        <p class="vt-sub"><span class="vt-auto" data-source="checagens" data-field="detalhe" data-where="id=aderencia_termos">—</span> Um termo só entra no perfil com prova; a coluna do GitHub mostra onde a prova já existe.</p>
+      </div>
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Termos que as vagas pedem</h3><p class="vt-note">Em quantas vagas cada termo aparece e em quantas é obrigatório.</p></div>
+          <div class="vt-filters vt-termfilter-ln" role="group" aria-label="Filtrar termos">
+            <button class="vt-btn" type="button" data-f="não" aria-pressed="true">Faltando no perfil</button>
+            <button class="vt-btn" type="button" data-f="sim" aria-pressed="false">No perfil</button>
+            <button class="vt-btn" type="button" data-f="" aria-pressed="false">Todos</button>
+          </div>
+          <div class="vt-tablebox">
+            <table class="vt-table vt-termos-ln" data-source="termos" data-row-key="termo">
+              <thead><tr>
+                <th scope="col" data-field="termo">Termo</th>
+                <th scope="col" data-field="tipo">Tipo</th>
+                <th scope="col" class="vt-n" data-field="vagas">Vagas</th>
+                <th scope="col" class="vt-n" data-field="obrigatorio">Obrigatório em</th>
+                <th scope="col" data-field="no_perfil">No perfil</th>
+                <th scope="col" data-field="no_github">Prova no GitHub</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Vagas-alvo</h3><p class="vt-note">Coletadas para os cargos-alvo. A contagem de termos é simples, sem o peso que a nota usa.</p></div>
+          <div class="vt-tablebox">
+            <table class="vt-table vt-vagas" data-source="vagas" data-row-key="id">
+              <thead><tr>
+                <th scope="col" data-field="titulo">Vaga</th>
+                <th scope="col" data-field="empresa">Empresa</th>
+                <th scope="col" class="vt-n" data-source="cobertura_vagas" data-field="no_perfil">Termos no perfil</th>
+                <th scope="col" class="vt-n" data-source="cobertura_vagas" data-field="termos">Termos pedidos</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="ln-checagens">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Checagens do LinkedIn</h2>
+        <p class="vt-sub">Cada linha é uma regra da nota que se resolve no LinkedIn, da maior perda para a menor.</p>
+      </div>
+      <div class="vt-filters"><button class="vt-btn vt-abertas" type="button" data-canal="linkedin" aria-pressed="false">Só com pontos em aberto</button></div>
+      <div class="vt-tablebox">
+        <table class="vt-table vt-checks" data-source="checagens" data-row-key="id">
+          <thead><tr>
+            <th scope="col" data-field="titulo">Checagem</th>
+            <th scope="col" data-field="grupo">Grupo</th>
+            <th scope="col" class="vt-n" data-field="pontos">Pontos</th>
+            <th scope="col" class="vt-n" data-field="max">Máximo</th>
+            <th scope="col" data-field="detalhe">Situação</th>
+            <th scope="col" data-field="como_subir">Como subir</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================== GitHub ============================== -->
+  <div class="vt-panel vt-off" id="github" role="tabpanel" aria-labelledby="tab-github">
+
+    <section class="vt-sec" id="gh-resumo">
+      <div class="vt-card">
+        <div class="vt-cardhead">
+          <h2 class="vt-h3">Resumo do GitHub</h2>
+          <p class="vt-note">O essencial de cada seção. O nome à esquerda leva até ela.</p>
+        </div>
+        <dl class="vt-resumo">
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-nota">Nota</button></dt><dd class="vt-r-nota dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-correcoes">Correções</button></dt><dd class="vt-r-correcoes dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-perfil">Perfil</button></dt><dd class="vt-r-perfil dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-atividade">Atividade</button></dt><dd class="vt-r-atividade dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-repos">Repositórios</button></dt><dd class="vt-r-repos dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-vagas">Vagas</button></dt><dd class="vt-r-vagas dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="gh-checagens">Checagens</button></dt><dd class="vt-r-checagens dash-skeleton">—</dd></div>
+          <div class="vt-res"><dt><button class="vt-reslink" type="button" data-go="rotina">Rotina</button></dt><dd class="vt-r-rotina dash-skeleton">—</dd></div>
+        </dl>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="gh-nota">
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead">
+            <h2 class="vt-h3">Nota do GitHub</h2>
+            <p class="vt-note">A parte da nota que se resolve dentro do GitHub. A nota total é <span class="vt-auto" data-source="nota_total">—</span> de 100.</p>
+          </div>
+          <div class="vt-score"><span class="vt-total vt-auto dash-skeleton" data-source="nota_canais" data-field="pontos" data-where="canal=github">—</span><span class="vt-of">de <span class="vt-auto" data-source="nota_canais" data-field="max" data-where="canal=github">—</span> pontos</span></div>
+          <div class="vt-cats vt-grupos" data-source="nota_grupos"></div>
+        </div>
+        <div class="vt-card" id="gh-correcoes">
+          <div class="vt-cardhead">
+            <h2 class="vt-h3">O que mais sobe a nota no GitHub</h2>
+            <p class="vt-note">As checagens com mais pontos em aberto. O número é quanto a nota sobe se a checagem for resolvida por inteiro.</p>
+          </div>
+          <div class="vt-fixes" data-source="perdas checagens"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="gh-perfil">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Perfil e atividade</h2>
+        <p class="vt-sub">Lido pela API e pelas páginas públicas do GitHub, só leitura. Lido em <span class="vt-auto" data-source="github" data-field="lido_em" data-row="0">—</span>.</p>
+      </div>
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Perfil</h3><p class="vt-note">O que aparece para quem abre a sua página.</p></div>
+          <dl class="vt-facts">
+            <dt>Usuário</dt><dd><a class="vt-link vt-gh-link vt-auto dash-skeleton" target="_blank" rel="noopener" data-source="github" data-field="usuario" data-row="0">—</a></dd>
+            <dt>Nome</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="nome" data-row="0">—</dd>
+            <dt>Bio</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="bio" data-row="0">—</dd>
+            <dt>Local</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="local" data-row="0">—</dd>
+            <dt>Site no perfil</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="site" data-row="0">—</dd>
+            <dt>Fixados</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="fixados_lista" data-row="0">—</dd>
+            <dt>Conta criada em</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="criado_em" data-row="0">—</dd>
+          </dl>
+          <dl class="vt-stats">
+            <div class="vt-stat"><dt>Repositórios públicos</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="repos_publicos" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Seguidores</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="seguidores" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Seguindo</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="seguindo" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Caracteres no README de perfil</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="readme_perfil_chars" data-row="0">—</dd></div>
+          </dl>
+        </div>
+        <div class="vt-card" id="gh-atividade">
+          <div class="vt-cardhead"><h3 class="vt-h3">Atividade</h3><p class="vt-note">Commits públicos por semana, nas últimas 12 semanas.</p></div>
+          <dl class="vt-stats">
+            <div class="vt-stat"><dt>Commits públicos, 12 semanas</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="commits_12s" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Contribuições no último ano</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="contribuicoes_ano" data-row="0">—</dd></div>
+            <div class="vt-stat"><dt>Último push</dt><dd class="vt-auto dash-skeleton" data-source="github" data-field="ultimo_push" data-row="0">—</dd></div>
+          </dl>
+          <div class="vt-chart vt-commits dash-skeleton" data-source="gh_commits"><div class="vt-tip"></div></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="gh-repos">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Repositórios</h2>
+        <p class="vt-sub">Só os de vitrine contam para a nota; neles, o que derruba ponto aparece em cor. Os de estudo e o de perfil estão aqui para conferência.</p>
+      </div>
+      <div class="vt-tablebox">
+        <table class="vt-table vt-repos" data-source="repos" data-row-key="nome">
+          <thead><tr>
+            <th scope="col" data-field="nome">Repositório</th>
+            <th scope="col" data-field="papel">Papel</th>
+            <th scope="col" data-field="descricao">Descrição</th>
+            <th scope="col" data-field="linguagens">Linguagens</th>
+            <th scope="col" class="vt-n" data-field="topicos">Tópicos</th>
+            <th scope="col" data-field="licenca">Licença</th>
+            <th scope="col" data-field="demo">Link de demo</th>
+            <th scope="col" class="vt-n" data-field="readme_chars">README (caracteres)</th>
+            <th scope="col" data-field="readme_imagem">Imagem no README</th>
+            <th scope="col" class="vt-n" data-field="commits_12s">Commits, 12 semanas</th>
+            <th scope="col" class="vt-n" data-field="estrelas">Estrelas</th>
+            <th scope="col" data-field="ultimo_push">Último push</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="gh-vagas">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">O GitHub e as vagas</h2>
+        <p class="vt-sub">Onde cada termo das vagas aparece nos repositórios de vitrine e no README de perfil: nome, descrição, tópicos, linguagens ou README. Usa a mesma regra de comparação da nota, mas não entra nela.</p>
+      </div>
+      <div class="vt-grid">
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Termos das vagas com prova no GitHub</h3><p class="vt-note">Um termo com prova aqui e fora do LinkedIn pode entrar no perfil, se você de fato o domina.</p></div>
+          <div class="vt-filters vt-termfilter-gh" role="group" aria-label="Filtrar termos">
+            <button class="vt-btn" type="button" data-f="so" aria-pressed="true">Com prova, fora do LinkedIn</button>
+            <button class="vt-btn" type="button" data-f="com" aria-pressed="false">Com prova</button>
+            <button class="vt-btn" type="button" data-f="sem" aria-pressed="false">Sem prova</button>
+            <button class="vt-btn" type="button" data-f="" aria-pressed="false">Todos</button>
+          </div>
+          <div class="vt-tablebox">
+            <table class="vt-table vt-termos-gh" data-source="termos" data-row-key="termo">
+              <thead><tr>
+                <th scope="col" data-field="termo">Termo</th>
+                <th scope="col" class="vt-n" data-field="vagas">Vagas</th>
+                <th scope="col" data-field="no_github">No GitHub</th>
+                <th scope="col" data-field="onde_github">Onde aparece</th>
+                <th scope="col" data-field="no_perfil">No LinkedIn</th>
+              </tr></thead>
+              <tbody></tbody>
+            </table>
+          </div>
+        </div>
+        <div class="vt-card">
+          <div class="vt-cardhead"><h3 class="vt-h3">Linguagens</h3><p class="vt-note">Parte do código de cada linguagem, somando todos os repositórios públicos.</p></div>
+          <div class="vt-cats vt-langs" data-source="gh_linguagens linguagens_pct"></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="vt-sec" id="gh-checagens">
+      <div class="vt-sechead">
+        <h2 class="vt-h2">Checagens do GitHub</h2>
+        <p class="vt-sub">Cada linha é uma regra da nota que se resolve no GitHub, da maior perda para a menor.</p>
+      </div>
+      <div class="vt-filters"><button class="vt-btn vt-abertas" type="button" data-canal="github" aria-pressed="false">Só com pontos em aberto</button></div>
+      <div class="vt-tablebox">
+        <table class="vt-table vt-checks" data-source="checagens" data-row-key="id">
+          <thead><tr>
+            <th scope="col" data-field="titulo">Checagem</th>
+            <th scope="col" data-field="grupo">Grupo</th>
+            <th scope="col" class="vt-n" data-field="pontos">Pontos</th>
+            <th scope="col" class="vt-n" data-field="max">Máximo</th>
+            <th scope="col" data-field="detalhe">Situação</th>
+            <th scope="col" data-field="como_subir">Como subir</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </section>
+  </div>
+
+  <!-- ============================== Rotina e nota total (nas duas abas) ============================== -->
+  <section class="vt-sec" id="rotina">
+    <div class="vt-sechead">
+      <h2 class="vt-h2">Rotina da semana e nota total</h2>
+      <p class="vt-sub">Uma missão curta por dia, com o texto pronto e o link de onde colar. Você cola e envia; a medição seguinte mostra se foi feito.</p>
+    </div>
+    <div class="vt-week">
+      <div class="vt-day" data-dow="Mon"><div class="vt-day-top"><span>Segunda</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">medir</div><div class="vt-day-what">Relê o perfil, o GitHub e as vagas, dá a nota nova e o plano da semana.</div></div>
+      <div class="vt-day" data-dow="Tue"><div class="vt-day-top"><span>Terça</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">perfil</div><div class="vt-day-what">Um trecho do perfil reescrito: título, sobre, experiência ou competências.</div></div>
+      <div class="vt-day" data-dow="Wed"><div class="vt-day-top"><span>Quarta</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">vitrine</div><div class="vt-day-what">Um projeto arrumado no GitHub e a entrada dele no LinkedIn.</div></div>
+      <div class="vt-day" data-dow="Thu"><div class="vt-day-top"><span>Quinta</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">topico</div><div class="vt-day-what">Um assunto da área, com fonte, e o post pronto.</div></div>
+      <div class="vt-day" data-dow="Fri"><div class="vt-day-top"><span>Sexta</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">conexoes</div><div class="vt-day-what">Pessoas para convidar, com a nota de convite, e comentários prontos.</div></div>
+      <div class="vt-day" data-dow="Sat"><div class="vt-day-top"><span>Sábado</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">bastidor</div><div class="vt-day-what">Post sobre o que você construiu ou aprendeu na semana.</div></div>
+      <div class="vt-day" data-dow="Sun"><div class="vt-day-top"><span>Domingo</span><span class="vt-hoje">hoje</span></div><div class="vt-day-name">fechamento</div><div class="vt-day-what">Resumo da semana, sem tarefa nova.</div></div>
+    </div>
+    <div class="vt-grid">
+      <div class="vt-card" id="nota-total">
+        <div class="vt-cardhead">
+          <h3 class="vt-h3">Nota total</h3>
+          <p class="vt-note">De 0 a 100, contada pelo script da rotina, nas quatro categorias oficiais.</p>
+        </div>
+        <div class="vt-score"><span class="vt-total vt-auto dash-skeleton" data-source="nota_total">—</span><span class="vt-of">de 100</span></div>
+        <div class="vt-cats vt-cats-total" data-source="nota"></div>
+      </div>
+      <div class="vt-card" id="nota-evolucao">
+        <div class="vt-cardhead">
+          <h3 class="vt-h3">Evolução da nota</h3>
+          <p class="vt-note">Um ponto por dia medido.</p>
+        </div>
+        <div class="vt-chart vt-trend dash-skeleton" data-source="historico"><div class="vt-tip"></div></div>
+        <p class="vt-note vt-trend-note"></p>
+      </div>
+    </div>
+    <div class="vt-card" id="diario">
+      <div class="vt-cardhead">
+        <h3 class="vt-h3">Diário</h3>
+        <p class="vt-note">A missão de cada dia, a mais nova em cima.</p>
+      </div>
+      <div class="vt-tablebox">
+        <table class="vt-table vt-diario" data-source="diario" data-row-key="data">
+          <thead><tr>
+            <th scope="col" data-field="data">Data</th>
+            <th scope="col" data-field="dia">Dia</th>
+            <th scope="col" data-field="rotina">Rotina</th>
+            <th scope="col" class="vt-n" data-field="nota">Nota</th>
+            <th scope="col" data-field="missao">Missão</th>
+            <th scope="col" data-field="checagem">Checagem</th>
+          </tr></thead>
+          <tbody></tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+</div>
+
+<script>
+dash.calc('nota_total', {
+  title: 'Nota total',
+  description: 'Soma dos pontos das quatro categorias, de 0 a 100.',
+  inputs: ['nota'],
+  fn: (nota) => Math.round(nota.reduce((soma, c) => soma + Number(c.pontos), 0) * 10) / 10,
+});
+dash.calc('nota_canais', {
+  title: 'Nota por canal',
+  description: 'Pontos, máximo e número de checagens de cada lado: o que se resolve no LinkedIn e o que se resolve no GitHub.',
+  inputs: ['checagens'],
+  fn: (checagens) => ['linkedin', 'github'].map((canal) => {
+    const r1 = (x) => Math.round(x * 10) / 10;
+    const meus = checagens.filter((c) => c.canal === canal);
+    const pontos = meus.reduce((s, c) => s + Number(c.pontos), 0);
+    const max = meus.reduce((s, c) => s + Number(c.max), 0);
+    const abertas = meus.filter((c) => Number(c.pontos) < Number(c.max)).length;
+    return { canal, pontos: r1(pontos), max: r1(max), checagens: meus.length, completas: meus.length - abertas, abertas, pontos_abertos: r1(max - pontos) };
+  }),
+});
+dash.calc('nota_grupos', {
+  title: 'Nota por grupo de checagens',
+  description: 'Pontos e máximo de cada grupo de checagens, dentro do LinkedIn e dentro do GitHub.',
+  inputs: ['checagens'],
+  fn: (checagens) => {
+    const grupos = new Map();
+    checagens.forEach((c) => {
+      const g = grupos.get(c.grupo) || { grupo: c.grupo, canal: c.canal, pontos: 0, max: 0 };
+      g.pontos += Number(c.pontos);
+      g.max += Number(c.max);
+      grupos.set(c.grupo, g);
+    });
+    return [...grupos.values()].map((g) => ({ grupo: g.grupo, canal: g.canal, pontos: Math.round(g.pontos * 10) / 10, max: Math.round(g.max * 10) / 10 }));
+  },
+});
+dash.calc('perdas', {
+  title: 'Pontos em aberto por checagem',
+  description: 'Máximo da checagem menos os pontos obtidos: quanto a nota sobe se ela for resolvida por inteiro.',
+  inputs: ['checagens'],
+  fn: (checagens) => checagens
+    .map((c) => ({ id: c.id, perda: Math.round((Number(c.max) - Number(c.pontos)) * 10) / 10 }))
+    .sort((a, b) => b.perda - a.perda),
+});
+dash.calc('cobertura_vagas', {
+  title: 'Termos de cada vaga no perfil',
+  description: 'Para cada vaga, quantos termos ela pede e quantos deles já aparecem no perfil do LinkedIn. Contagem simples, sem peso.',
+  inputs: ['vagas', 'termos'],
+  fn: (vagas, termos) => vagas.map((v) => {
+    const pedidos = termos.filter((t) => String(t.vagas_ids).split(',').includes(v.id));
+    return { id: v.id, termos: pedidos.length, no_perfil: pedidos.filter((t) => t.no_perfil === 'sim').length };
+  }),
+});
+dash.calc('resumo', {
+  title: 'Contagens dos resumos',
+  description: 'Contagens simples para os resumos de abertura: termos das vagas no LinkedIn e no GitHub, repositórios de vitrine e vagas.',
+  inputs: ['termos', 'repos', 'vagas'],
+  fn: (termos, repos, vagas) => [{
+    termos: termos.length,
+    termos_no_perfil: termos.filter((t) => t.no_perfil === 'sim').length,
+    termos_no_github: termos.filter((t) => t.no_github === 'sim').length,
+    termos_so_github: termos.filter((t) => t.no_github === 'sim' && t.no_perfil !== 'sim').length,
+    repos_vitrine: repos.filter((r) => r.papel === 'vitrine').length,
+    vagas: vagas.length,
+  }],
+});
+dash.calc('linguagens_pct', {
+  title: 'Parte de cada linguagem',
+  description: 'Bytes de código de cada linguagem sobre o total dos repositórios públicos, em porcentagem.',
+  inputs: ['gh_linguagens'],
+  fn: (gh_linguagens) => {
+    const total = gh_linguagens.reduce((s, l) => s + Number(l.bytes), 0);
+    return gh_linguagens.map((l) => ({ linguagem: l.linguagem, pct: total ? Math.round((Number(l.bytes) / total) * 1000) / 10 : 0 }));
+  },
+});
+
+const page = document.querySelector('.vt-page');
+const $ = (s) => page.querySelector(s);
+const IDS = ['nota', 'checagens', 'termos', 'vagas', 'repos', 'github', 'linkedin', 'historico', 'diario', 'gh_commits', 'gh_linguagens'];
+const ACCENT = dash.colors[0];
+const CRIT = 'var(--cds-chart-status-critical)';
+const state = { view: 'linkedin', termoLn: 'não', termoGh: 'so', abertas: { linkedin: false, github: false } };
+
+const rows = (id) => { const d = dash.data(id); return d.status === 'ok' && Array.isArray(d.data) ? d.data : []; };
+const vazio = (v) => v === null || v === undefined || v === '';
+const num = (v) => (vazio(v) ? '—' : String(Number(v)));
+const txt = (v) => (vazio(v) ? '—' : String(v));
+const el = (tag, cls, text) => { const e = document.createElement(tag); if (cls) e.className = cls; if (text !== undefined) e.textContent = text; return e; };
+const mark = (e, source, field, where) => { e.dataset.source = source; if (field) e.dataset.field = field; if (where) e.dataset.where = where; return e; };
+const bar = (frac, color, cls) => { const b = el('div', 'vt-bar' + (cls ? ' ' + cls : '')); const i = el('i'); i.style.width = Math.max(0, Math.min(1, frac || 0)) * 100 + '%'; i.style.background = color; b.append(i); return b; };
+const td = (text, cls) => el('td', cls || null, text);
+const safe = (fn) => { try { fn(); } catch (e) { setTimeout(() => { throw e; }); } };
+const lista = (itens, sep) => itens.flatMap((x, i) => (i ? [sep, ...x] : x));
+const linkSeguro = (a, url, padrao) => { if (typeof url === 'string' && padrao.test(url)) { a.href = url; a.target = '_blank'; a.rel = 'noopener'; } else a.removeAttribute('href'); };
+const aberta = (c) => Number(c.pontos) < Number(c.max);
+
+function renderHead() {
+  const total = dash.data('nota_total');
+  const canais = new Map(rows('nota_canais').map((c) => [c.canal, c]));
+  const t = $('.vt-takeaway');
+  t.replaceChildren();
+  const ln = canais.get('linkedin'), gh = canais.get('github');
+  if (total.status === 'ok' && typeof total.data === 'number' && ln && gh) {
+    const m = (canal, campo, tag) => mark(el(tag, null, num(canais.get(canal)[campo])), 'nota_canais', campo, 'canal=' + canal);
+    t.append('Nota ', mark(el('b', null, num(total.data)), 'nota_total'), ' de 100. O LinkedIn tem ', m('linkedin', 'pontos', 'b'), ' de ', m('linkedin', 'max', 'span'),
+      ' pontos e o GitHub, ', m('github', 'pontos', 'b'), ' de ', m('github', 'max', 'span'), '.');
+  } else {
+    t.textContent = '—';
+  }
+  page.querySelectorAll('.vt-auto').forEach((e) => {
+    const d = dash.data(e.dataset.source);
+    let v;
+    if (d.status === 'ok') {
+      if (Array.isArray(d.data)) {
+        let r;
+        if (e.dataset.where) { const i = e.dataset.where.indexOf('='); const k = e.dataset.where.slice(0, i), val = e.dataset.where.slice(i + 1); r = d.data.find((x) => String(x[k]) === val); }
+        else r = d.data[Number(e.dataset.row || 0)];
+        v = r ? r[e.dataset.field] : undefined;
+      } else {
+        v = d.data;
+      }
+    }
+    e.textContent = txt(v);
+  });
+  const g = rows('github')[0], l = rows('linkedin')[0];
+  page.querySelectorAll('.vt-gh-link').forEach((a) => linkSeguro(a, g && g.url, /^https:\/\/github\.com\//));
+  page.querySelectorAll('.vt-ln-link').forEach((a) => linkSeguro(a, l && l.url, /^https:\/\/www\.linkedin\.com\//));
+  page.querySelectorAll('.vt-tab').forEach((b) => b.setAttribute('aria-selected', String(b.dataset.view === state.view)));
+  page.querySelectorAll('.vt-panel').forEach((p) => p.classList.toggle('vt-off', p.id !== state.view));
+}
+
+function linhaBarra(nome, pontos, max, fonte, chave) {
+  const frac = Number(pontos) / Number(max);
+  const linha = el('div', 'vt-cat'), topo = el('div', 'vt-cat-top'), val = el('span', 'vt-cat-val');
+  val.append(mark(el('span', 'vt-strong', num(pontos)), fonte, 'pontos', chave), ' / ', mark(el('span', null, num(max)), fonte, 'max', chave));
+  topo.append(nome, val);
+  linha.append(topo, bar(frac, frac < 0.5 ? CRIT : ACCENT));
+  return linha;
+}
+
+function renderCanal(canal) {
+  const P = $('#' + canal);
+  const checks = rows('checagens').filter((c) => c.canal === canal);
+  const porId = new Map(checks.map((c) => [c.id, c]));
+  const perdas = rows('perdas').filter((x) => x.perda > 0 && porId.has(x.id));
+  const grupos = rows('nota_grupos').filter((g) => g.canal === canal);
+  const nc = rows('nota_canais').find((c) => c.canal === canal);
+  const N = (campo) => mark(el('b', null, nc ? num(nc[campo]) : '—'), 'nota_canais', campo, 'canal=' + canal);
+  const set = (sel, partes) => { const d = P.querySelector(sel); d.replaceChildren(); d.append(...partes); };
+
+  // nota por grupo
+  const caixa = P.querySelector('.vt-grupos');
+  caixa.replaceChildren();
+  grupos.forEach((g) => caixa.append(linhaBarra(mark(el('span', null, txt(g.grupo)), 'nota_grupos', 'grupo', 'grupo=' + g.grupo), g.pontos, g.max, 'nota_grupos', 'grupo=' + g.grupo)));
+
+  // o que mais sobe
+  const fixes = P.querySelector('.vt-fixes');
+  fixes.replaceChildren();
+  perdas.slice(0, 5).forEach((x) => {
+    const c = porId.get(x.id), onde = 'id=' + x.id;
+    const item = el('div', 'vt-fix'), ganho = el('div', 'vt-gain'), corpo = el('div', 'vt-fix-body'), titulo = el('div', 'vt-fix-title'), como = el('p', 'vt-fix-how');
+    ganho.append('+', mark(el('span', null, num(x.perda)), 'perdas', 'perda', onde));
+    titulo.append(mark(el('span', null, txt(c.titulo)), 'checagens', 'titulo', onde), mark(el('span', 'vt-pill', txt(c.grupo)), 'checagens', 'grupo', onde));
+    como.append('Como subir: ', mark(el('span', null, txt(c.como_subir)), 'checagens', 'como_subir', onde));
+    corpo.append(titulo, mark(el('p', 'vt-fix-text', txt(c.detalhe)), 'checagens', 'detalhe', onde), como);
+    item.append(ganho, corpo);
+    fixes.append(item);
+  });
+  if (!perdas.length && dash.data('checagens').status === 'ok') fixes.append(el('p', 'vt-note', 'Nenhuma checagem com pontos em aberto.'));
+
+  // tabela de checagens
+  const corpoT = P.querySelector('.vt-checks tbody');
+  corpoT.replaceChildren();
+  checks.filter((c) => !state.abertas[canal] || aberta(c))
+    .sort((a, b) => (b.max - b.pontos) - (a.max - a.pontos) || b.max - a.max)
+    .forEach((c) => {
+      const tr = el('tr', aberta(c) ? null : 'vt-dim'), p = el('td', 'vt-n');
+      tr.dataset.key = c.id;
+      p.append(el('span', null, num(c.pontos)), bar(Number(c.pontos) / Number(c.max), ACCENT, 'vt-thin'));
+      tr.append(td(txt(c.titulo), 'vt-mid'), td(txt(c.grupo), 'vt-nowrap'), p, td(num(c.max), 'vt-n'), td(txt(c.detalhe), 'vt-wide'), td(txt(c.como_subir), 'vt-wide'));
+      corpoT.append(tr);
+    });
+  P.querySelector('.vt-abertas').setAttribute('aria-pressed', String(state.abertas[canal]));
+
+  // resumo: linhas comuns às duas abas
+  set('.vt-r-nota', [N('pontos'), ' de ', N('max'), ' pontos possíveis. ',
+    ...lista(grupos.map((g) => { const onde = 'grupo=' + g.grupo; return [mark(el('span', null, txt(g.grupo)), 'nota_grupos', 'grupo', onde), ' ', mark(el('span', null, num(g.pontos)), 'nota_grupos', 'pontos', onde), '/', mark(el('span', null, num(g.max)), 'nota_grupos', 'max', onde)]; }), ' · ')]);
+  set('.vt-r-correcoes', [N('pontos_abertos'), ' pontos em aberto',
+    ...(perdas.length ? ['. As maiores perdas: ', ...lista(perdas.slice(0, 3).map((x) => [mark(el('span', null, txt(porId.get(x.id).titulo)), 'checagens', 'titulo', 'id=' + x.id), ' (+', mark(el('span', null, num(x.perda)), 'perdas', 'perda', 'id=' + x.id), ')']), '; ')] : []), '.']);
+  set('.vt-r-checagens', [N('completas'), ' de ', N('checagens'), ' checagens com pontuação máxima; ', N('abertas'), ' com pontos em aberto.']);
+  const rotina = [], hoje = $('.vt-day.vt-today');
+  if (hoje) rotina.push('Hoje é ' + hoje.querySelector('.vt-day-top span').textContent.toLowerCase() + ', dia de ', el('b', null, hoje.querySelector('.vt-day-name').textContent), '. ' + hoje.querySelector('.vt-day-what').textContent + ' ');
+  const d = rows('diario').slice().sort((a, b) => String(b.data).localeCompare(String(a.data)))[0];
+  if (d) rotina.push('Última entrada do diário: ', mark(el('span', null, txt(d.data)), 'diario', 'data', 'data=' + d.data), ', ', mark(el('span', null, txt(d.rotina)), 'diario', 'rotina', 'data=' + d.data), '.');
+  set('.vt-r-rotina', rotina.length ? rotina : ['—']);
+}
+
+function renderResumos() {
+  const k = rows('resumo')[0], ln = rows('linkedin')[0], gh = rows('github')[0];
+  const um = (fonte, linha, campo, texto) => { const e = mark(el('b', null, linha ? (texto ? txt(linha[campo]) : num(linha[campo])) : '—'), fonte, campo); e.dataset.row = '0'; return e; };
+  const K = (campo) => um('resumo', k, campo);
+  const L = (campo, texto) => um('linkedin', ln, campo, texto);
+  const G = (campo, texto) => um('github', gh, campo, texto);
+  const set = (sel, partes) => { const d = $(sel); d.replaceChildren(); d.append(...partes); };
+  const soGithub = rows('termos').filter((t) => t.no_github === 'sim' && t.no_perfil !== 'sim').sort((a, b) => b.vagas - a.vagas);
+  const nomes = soGithub.length ? [': ', ...lista(soGithub.map((t) => [mark(el('span', null, txt(t.termo)), 'termos', 'termo', 'termo=' + t.termo)]), ', ')] : [];
+
+  set('#linkedin .vt-r-perfil', [L('conexoes'), ' conexões, ', L('seguidores'), ' seguidores, ', L('recomendacoes'), ' recomendações e ', L('competencias'), ' competências. Itens em Destaques: ', L('destaques'), '; projetos com link: ', L('projetos'), '.']);
+  set('#linkedin .vt-r-atividade', ['Último post próprio em ', L('ultimo_post', true), '. ', L('posts_30d'), ' posts em 30 dias e ', L('comentarios_7d'), ' comentários em 7 dias. ', L('visualizacoes_perfil_7d'), ' visualizações do perfil em 7 dias.']);
+  set('#linkedin .vt-r-vagas', [K('termos_no_perfil'), ' de ', K('termos'), ' termos das ', K('vagas'), ' vagas-alvo já estão no perfil. Dos que faltam, ', K('termos_so_github'), ' têm prova no GitHub', ...nomes, '.']);
+
+  const bio = gh && !vazio(gh.bio) ? [' Bio: ', G('bio', true), '.'] : [' A bio está vazia.'];
+  set('#github .vt-r-perfil', [G('repos_publicos'), ' repositórios públicos, ', K('repos_vitrine'), ' de vitrine; fixados no perfil: ', G('fixados'), '. ', G('seguidores'), ' seguidores.', ...bio]);
+  set('#github .vt-r-atividade', [G('commits_12s'), ' commits públicos nas últimas 12 semanas; último push em ', G('ultimo_push', true), '. ', G('contribuicoes_ano'), ' contribuições no último ano, pelo calendário do perfil.']);
+  const vit = rows('repos').filter((r) => r.papel === 'vitrine');
+  set('#github .vt-r-repos', vit.length ? ['Os de vitrine: ', ...lista(vit.map((r) => [mark(el('b', null, txt(r.nome)), 'repos', 'nome', 'nome=' + r.nome), ', último push em ', mark(el('span', null, txt(r.ultimo_push)), 'repos', 'ultimo_push', 'nome=' + r.nome)]), '; '), '.'] : ['—']);
+  set('#github .vt-r-vagas', [K('termos_no_github'), ' de ', K('termos'), ' termos das vagas aparecem nos repositórios. Desses, ', K('termos_so_github'), ' ainda não estão no LinkedIn', ...nomes, '.']);
+}
+
+function renderLinkedin() {
+  const total = rows('vagas').length || 1;
+  const corpo = $('.vt-termos-ln tbody');
+  corpo.replaceChildren();
+  rows('termos').filter((t) => !state.termoLn || t.no_perfil === state.termoLn)
+    .sort((a, b) => String(a.no_perfil).localeCompare(String(b.no_perfil)) || b.vagas - a.vagas || b.obrigatorio - a.obrigatorio)
+    .forEach((t) => {
+      const tr = el('tr'), v = el('td', 'vt-n');
+      v.append(el('span', null, num(t.vagas)), bar(Number(t.vagas) / total, t.no_perfil === 'sim' ? ACCENT : CRIT, 'vt-thin'));
+      tr.append(td(txt(t.termo)), td(txt(t.tipo)), v, td(num(t.obrigatorio), 'vt-n'), td(txt(t.no_perfil), t.no_perfil === 'sim' ? 'vt-ok' : 'vt-bad'),
+        td(txt(t.no_github), t.no_github === 'sim' && t.no_perfil !== 'sim' ? 'vt-ok' : null));
+      corpo.append(tr);
+    });
+  page.querySelectorAll('.vt-termfilter-ln .vt-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === state.termoLn)));
+
+  const cob = new Map(rows('cobertura_vagas').map((x) => [x.id, x]));
+  const tabela = $('.vt-vagas tbody');
+  tabela.replaceChildren();
+  rows('vagas').forEach((v) => {
+    const tr = el('tr'), k = cob.get(v.id);
+    tr.dataset.key = v.id;
+    const vaga = el('td', 'vt-mid'), a = el('a', 'vt-link', txt(v.titulo));
+    linkSeguro(a, v.url, /^https:\/\//);
+    vaga.append(a);
+    const no = el('td', 'vt-n');
+    no.append(el('span', null, k ? num(k.no_perfil) : '—'));
+    if (k) no.append(bar(k.termos ? k.no_perfil / k.termos : 0, ACCENT, 'vt-thin'));
+    tr.append(vaga, td(txt(v.empresa)), no, td(k ? num(k.termos) : '—', 'vt-n'));
+    tabela.append(tr);
+  });
+}
+
+function renderGithub() {
+  const corpo = $('.vt-repos tbody');
+  corpo.replaceChildren();
+  const ordem = { vitrine: 0, perfil: 1, estudo: 2 };
+  const gh = rows('github')[0];
+  const lido = gh ? new Date(String(gh.lido_em).slice(0, 10) + 'T00:00:00Z') : new Date();
+  rows('repos').slice().sort((a, b) => (ordem[a.papel] ?? 9) - (ordem[b.papel] ?? 9) || String(b.ultimo_push).localeCompare(String(a.ultimo_push))).forEach((r) => {
+    const conta = r.papel === 'vitrine';
+    const tr = el('tr', conta ? null : 'vt-dim');
+    const nome = el('td', 'vt-nowrap'), a = el('a', 'vt-link', txt(r.nome));
+    linkSeguro(a, r.url, /^https:\/\/github\.com\//);
+    nome.append(a);
+    const dias = (lido - new Date(String(r.ultimo_push).slice(0, 10) + 'T00:00:00Z')) / 864e5;
+    const cls = (base, cond, nivel) => [base, conta && cond ? nivel : ''].filter(Boolean).join(' ');
+    tr.append(nome, td(txt(r.papel)),
+      td(txt(r.descricao), cls('vt-mid', vazio(r.descricao), 'vt-bad')),
+      td(txt(r.linguagens)),
+      td(num(r.topicos), cls('vt-n', Number(r.topicos) < 3, 'vt-warn')),
+      td(txt(r.licenca), cls('', r.licenca === 'não', 'vt-bad')),
+      td(txt(r.demo), cls('', r.demo === 'não', 'vt-warn')),
+      td(num(r.readme_chars), cls('vt-n', Number(r.readme_chars) < 1500, 'vt-bad')),
+      td(txt(r.readme_imagem), cls('', r.readme_imagem === 'não', 'vt-warn')),
+      td(num(r.commits_12s), 'vt-n'),
+      td(num(r.estrelas), 'vt-n'),
+      td(txt(r.ultimo_push), cls('vt-nowrap', dias > 90, 'vt-warn')));
+    corpo.append(tr);
+  });
+
+  const filtro = { so: (t) => t.no_github === 'sim' && t.no_perfil !== 'sim', com: (t) => t.no_github === 'sim', sem: (t) => t.no_github !== 'sim' }[state.termoGh] || (() => true);
+  const total = rows('vagas').length || 1;
+  const tabela = $('.vt-termos-gh tbody');
+  tabela.replaceChildren();
+  rows('termos').filter(filtro).sort((a, b) => b.vagas - a.vagas || b.obrigatorio - a.obrigatorio).forEach((t) => {
+    const tr = el('tr'), v = el('td', 'vt-n');
+    v.append(el('span', null, num(t.vagas)), bar(Number(t.vagas) / total, t.no_github === 'sim' ? ACCENT : CRIT, 'vt-thin'));
+    tr.append(td(txt(t.termo)), v, td(txt(t.no_github), t.no_github === 'sim' ? 'vt-ok' : 'vt-bad'), td(txt(t.onde_github), 'vt-mid'), td(txt(t.no_perfil), t.no_perfil === 'sim' ? 'vt-ok' : 'vt-bad'));
+    tabela.append(tr);
+  });
+  page.querySelectorAll('.vt-termfilter-gh .vt-btn').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.f === state.termoGh)));
+
+  const langs = $('.vt-langs');
+  langs.replaceChildren();
+  const pct = new Map(rows('linguagens_pct').map((l) => [l.linguagem, l.pct]));
+  rows('gh_linguagens').slice().sort((a, b) => b.bytes - a.bytes).forEach((l) => {
+    const onde = 'linguagem=' + l.linguagem, p = pct.get(l.linguagem);
+    const linha = el('div', 'vt-cat'), topo = el('div', 'vt-cat-top'), val = el('span', 'vt-cat-val');
+    val.append(mark(el('span', 'vt-strong', num(p)), 'linguagens_pct', 'pct', onde), '%');
+    topo.append(mark(el('span', null, txt(l.linguagem)), 'gh_linguagens', 'linguagem', onde), val);
+    linha.append(topo, bar(Number(p) / 100, ACCENT), mark(el('span', 'vt-cat-note', txt(l.repos)), 'gh_linguagens', 'repos', onde));
+    langs.append(linha);
+  });
+}
+
+function mostrarTip(box, tip, linhas, px, py) {
+  tip.replaceChildren(...linhas.map(([texto, fraco]) => el('div', fraco ? 'vt-tip-d' : null, texto)));
+  tip.style.left = Math.max(80, Math.min(box.clientWidth - 80, px)) + 'px';
+  tip.style.top = Math.max(18 * linhas.length + 14, py - 8) + 'px';
+  tip.classList.add('vt-on');
+}
+
+function renderCommits() {
+  const box = $('.vt-commits'), tip = box.querySelector('.vt-tip');
+  box.querySelectorAll('svg').forEach((s) => s.remove());
+  tip.classList.remove('vt-on');
+  const w = rows('gh_commits').slice().sort((a, b) => String(a.semana).localeCompare(String(b.semana)));
+  if (!w.length || !box.clientWidth) return;
+  const W = Math.max(box.clientWidth, 260), H = 180, m = { t: 12, r: 8, b: 26, l: 28 };
+  const x = d3.scaleBand(w.map((r) => String(r.semana)), [m.l, W - m.r]).padding(0.25);
+  const topo = Math.max(1, d3.max(w, (r) => Number(r.commits)));
+  const y = d3.scaleLinear([0, topo], [H - m.b, m.t]);
+  const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Commits públicos por semana');
+  [0, topo].forEach((t) => {
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).style('stroke', t === 0 ? 'var(--cds-chart-axis)' : 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    svg.append('text').attr('class', 'vt-tick').attr('x', m.l - 6).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').text(t);
+  });
+  const largura = Math.min(x.bandwidth(), 32);
+  w.forEach((r) => {
+    const cx = x(String(r.semana)) + x.bandwidth() / 2, n = Number(r.commits);
+    if (n > 0) svg.append('rect').attr('x', cx - largura / 2).attr('y', y(n)).attr('width', largura).attr('height', y(0) - y(n)).attr('rx', 3).style('fill', ACCENT);
+    svg.append('rect').attr('x', x(String(r.semana))).attr('y', m.t).attr('width', x.bandwidth()).attr('height', H - m.t - m.b).attr('fill', 'transparent')
+      .on('mouseenter', () => mostrarTip(box, tip, [['Semana de ' + String(r.semana).slice(0, 10), true], [num(n) + (n === 1 ? ' commit' : ' commits')], ...(vazio(r.repos) ? [] : [[String(r.repos), true]])], cx * (box.clientWidth / W), y(n) * (box.clientWidth / W)))
+      .on('mouseleave', () => tip.classList.remove('vt-on'));
+  });
+  [[w[0], 'start', x(String(w[0].semana))], [w[w.length - 1], 'end', x(String(w[w.length - 1].semana)) + x.bandwidth()]].forEach(([r, ancora, px]) => {
+    svg.append('text').attr('class', 'vt-tick').attr('x', px).attr('y', H - 8).attr('text-anchor', ancora).text(String(r.semana).slice(0, 10));
+  });
+}
+
+function renderTotal() {
+  const box = $('.vt-cats-total');
+  box.replaceChildren();
+  rows('nota').forEach((c) => box.append(linhaBarra(mark(el('span', null, txt(c.nome)), 'nota', 'nome', 'categoria=' + c.categoria), c.pontos, c.max, 'nota', 'categoria=' + c.categoria)));
+}
+
+function renderTrend() {
+  const box = $('.vt-trend'), note = $('.vt-trend-note'), tip = box.querySelector('.vt-tip');
+  box.querySelectorAll('svg').forEach((s) => s.remove());
+  tip.classList.remove('vt-on');
+  const h = rows('historico').slice().sort((a, b) => String(a.data).localeCompare(String(b.data)));
+  if (!h.length) { note.textContent = ''; return; }
+  const W = Math.max(box.clientWidth, 260), H = 200, m = { t: 14, r: 52, b: 28, l: 34 };
+  const pts = h.map((r) => ({ d: new Date(String(r.data).slice(0, 10) + 'T00:00:00Z'), v: Number(r.total), r }));
+  const um = pts.length === 1;
+  const xs = um ? null : d3.scaleUtc(d3.extent(pts, (p) => p.d), [m.l, W - m.r]);
+  const x = (p) => (um ? (m.l + W - m.r) / 2 : xs(p.d));
+  const y = d3.scaleLinear([0, 100], [H - m.b, m.t]);
+  const svg = d3.select(box).append('svg').attr('width', '100%').attr('viewBox', `0 0 ${W} ${H}`).attr('role', 'img').attr('aria-label', 'Evolução da nota total, de 0 a 100');
+  [0, 25, 50, 75, 100].forEach((t) => {
+    svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).style('stroke', 'var(--cds-chart-grid)').attr('stroke-width', 1);
+    svg.append('text').attr('class', 'vt-tick').attr('x', m.l - 6).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').text(t);
+  });
+  if (!um) svg.append('path').attr('d', d3.line().x(x).y((p) => y(p.v))(pts)).attr('fill', 'none').style('stroke', ACCENT).attr('stroke-width', 2).attr('stroke-linecap', 'round').attr('stroke-linejoin', 'round');
+  const ultimo = pts[pts.length - 1];
+  pts.forEach((p) => svg.append('circle').attr('cx', x(p)).attr('cy', y(p.v)).attr('r', p === ultimo ? 4.5 : 3).style('fill', ACCENT));
+  svg.append('text').attr('class', 'vt-endlabel').attr('x', x(ultimo) + 9).attr('y', y(ultimo.v)).attr('dy', '0.32em').text(num(ultimo.v));
+  (um ? [pts[0]] : [pts[0], ultimo]).forEach((p, i) => {
+    svg.append('text').attr('class', 'vt-tick').attr('x', x(p)).attr('y', H - 8).attr('text-anchor', um ? 'middle' : i === 0 ? 'start' : 'end').text(String(p.r.data).slice(0, 10));
+  });
+  pts.forEach((p) => {
+    svg.append('circle').attr('cx', x(p)).attr('cy', y(p.v)).attr('r', 14).attr('fill', 'transparent')
+      .on('mouseenter', () => {
+        const linhas = [[String(p.r.data).slice(0, 10), true], ['Nota ' + num(p.v)]];
+        [['Aderência', 'aderencia'], ['Perfil', 'perfil'], ['Vitrine', 'vitrine'], ['Atividade', 'atividade']].forEach(([rotulo, campo]) => { if (!vazio(p.r[campo])) linhas.push([rotulo + ' ' + num(p.r[campo]), true]); });
+        mostrarTip(box, tip, linhas, x(p) * (box.clientWidth / W), y(p.v) * (box.clientWidth / W));
+      })
+      .on('mouseleave', () => tip.classList.remove('vt-on'));
+  });
+  note.textContent = um ? 'Primeira medição. A linha aparece a partir da próxima rodada.' : '';
+}
+
+function renderWeek() {
+  const dow = new Intl.DateTimeFormat('en-US', { timeZone: 'America/Sao_Paulo', weekday: 'short' }).format(new Date());
+  page.querySelectorAll('.vt-day').forEach((d) => d.classList.toggle('vt-today', d.dataset.dow === dow));
+}
+
+function renderDiario() {
+  const corpo = $('.vt-diario tbody');
+  corpo.replaceChildren();
+  rows('diario').slice().sort((a, b) => String(b.data).localeCompare(String(a.data))).forEach((r) => {
+    const tr = el('tr');
+    tr.append(td(txt(r.data), 'vt-nowrap'), td(txt(r.dia)), td(txt(r.rotina)), td(num(r.nota), 'vt-n'), td(txt(r.missao), 'vt-wide'), td(txt(r.checagem)));
+    corpo.append(tr);
+  });
+}
+
+function desenhar() {
+  [renderHead, renderWeek, () => renderCanal('linkedin'), () => renderCanal('github'), renderResumos, renderLinkedin, renderGithub, renderCommits, renderTotal, renderTrend, renderDiario].forEach(safe);
+}
+
+function abrir(view) {
+  if (view !== 'linkedin' && view !== 'github') return;
+  state.view = view;
+  desenhar();
+}
+
+function ir(alvo) {
+  const painel = alvo.closest('.vt-panel');
+  if (painel && painel.id !== state.view) abrir(painel.id);
+  if (alvo.classList.contains('vt-panel')) { dash.setLink(alvo.id); return; }
+  alvo.scrollIntoView({ block: 'start' });
+  dash.setLink(alvo.id);
+}
+
+$('.vt-tabs').addEventListener('click', (ev) => {
+  const b = ev.target.closest('.vt-tab');
+  if (!b) return;
+  abrir(b.dataset.view);
+  dash.setLink(b.dataset.view);
+});
+page.addEventListener('click', (ev) => {
+  const link = ev.target.closest('.vt-reslink');
+  if (link) { const alvo = document.getElementById(link.dataset.go); if (alvo && page.contains(alvo)) ir(alvo); return; }
+  const ab = ev.target.closest('.vt-abertas');
+  if (ab) { state.abertas[ab.dataset.canal] = !state.abertas[ab.dataset.canal]; safe(() => renderCanal(ab.dataset.canal)); return; }
+  const f = ev.target.closest('.vt-termfilter-ln .vt-btn, .vt-termfilter-gh .vt-btn');
+  if (f) {
+    if (f.closest('.vt-termfilter-ln')) { state.termoLn = f.dataset.f; safe(renderLinkedin); }
+    else { state.termoGh = f.dataset.f; safe(renderGithub); }
+  }
+});
+
+let abriu = false;
+dash.onData(() => {
+  desenhar();
+  const carregando = IDS.some((id) => dash.data(id).status === 'loading');
+  if (!carregando) {
+    page.querySelectorAll('.dash-skeleton').forEach((e) => e.classList.remove('dash-skeleton'));
+    if (!abriu) {
+      abriu = true;
+      const nome = location.hash.slice(1);
+      const alvo = /^[a-z-]+$/.test(nome) ? document.getElementById(nome) : null;
+      if (alvo && page.contains(alvo)) ir(alvo);
+    }
+  }
+});
+</script>

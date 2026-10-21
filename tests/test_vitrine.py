@@ -73,11 +73,26 @@ class Vitrine(unittest.TestCase):
         self.assertEqual(por_id["repo_licenca"]["pontos"], por_id["repo_licenca"]["max"])
         self.assertEqual(por_id["repo_descricao"]["detalhe"], "1 de 1.")
 
+    def test_push_de_hoje_conta_como_recente(self):
+        alvo = {"github_user": "fulano"}
+        gh = {"repos": [{"nome": "projeto", "ultimo_push": os.environ["VITRINE_HOJE"]}]}
+        por_id = {c["id"]: c for c in motor.checar_vitrine({}, gh, alvo)}
+        self.assertEqual(por_id["repo_recente"]["pontos"], por_id["repo_recente"]["max"])
+
     def test_sem_repositorio_de_vitrine(self):
         alvo = {"github_user": "fulano", "repos_estudo": ["estudos"]}
         gh = {"repos": [{"nome": "estudos"}]}
         por_id = {c["id"]: c for c in motor.checar_vitrine({}, gh, alvo)}
         self.assertEqual(por_id["repos"]["pontos"], 0)
+
+
+class Registro(unittest.TestCase):
+    def test_registro_de_hoje_conta(self):
+        hoje = os.environ["VITRINE_HOJE"]
+        registro = [{"data": hoje, "tipo": "post"}, {"data": hoje, "tipo": "comentario"}]
+        por_id = {c["id"]: c for c in motor.checar_atividade({}, registro)}
+        self.assertEqual(por_id["ritmo_posts"]["detalhe"], "1 post(s) em 30 dias.")
+        self.assertEqual(por_id["comentarios"]["detalhe"], "1 comentário(s) em 7 dias.")
 
 
 class NotaDoExemplo(unittest.TestCase):

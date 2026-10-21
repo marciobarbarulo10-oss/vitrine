@@ -118,6 +118,12 @@ def dias_desde(iso):
         return None
 
 
+def dentro_de(iso, dias):
+    """Data nos últimos `dias` dias, contando hoje (dias_desde == 0)."""
+    d = dias_desde(iso)
+    return d is not None and d <= dias
+
+
 # ---------------------------------------------------------------- GitHub
 
 def api(url):
@@ -396,7 +402,7 @@ def checar_vitrine(p, gh, alvo):
         ("repo_licenca", "Licença definida", 1, lambda r: bool(r.get("licenca")),
          "Adicionar um arquivo LICENSE (MIT é o usual em projeto pessoal)."),
         ("repo_recente", "Atualizado nos últimos 90 dias", 1,
-         lambda r: (dias_desde(r.get("ultimo_push")) or 999) <= 90,
+         lambda r: dentro_de(r.get("ultimo_push"), 90),
          "Um commit de melhoria real: README, teste ou correção."),
     ]
     for cid, titulo, maximo, teste, como in itens:
@@ -412,7 +418,7 @@ def checar_atividade(p, registro):
     atv = p.get("atividade") or {}
 
     def reg(tipo, dias):
-        return sum(1 for r in registro if r.get("tipo") == tipo and (dias_desde(r.get("data")) or 999) <= dias)
+        return sum(1 for r in registro if r.get("tipo") == tipo and dentro_de(r.get("data"), dias))
 
     datas_post = [r.get("data") for r in registro if r.get("tipo") == "post"]
     if atv.get("ultimo_post"):
@@ -523,7 +529,7 @@ def cmd_hoje(_):
     perdas = sorted([c for c in n["checagens"] if c["max"] - c["pontos"] > 0.05 and (cat is None or c["categoria"] == cat)],
                     key=lambda c: c["max"] - c["pontos"], reverse=True)
     feitas = {r.get("checagem") for r in linhas_jsonl("registro.jsonl")
-              if r.get("tipo") == "missao" and (dias_desde(r.get("data")) or 999) <= 6}
+              if r.get("tipo") == "missao" and dentro_de(r.get("data"), 6)}
     print("\nChecagens candidatas (maior perda primeiro; * = já foi missão nos últimos 6 dias):")
     for c in perdas[:6]:
         marca = "*" if c["id"] in feitas else " "

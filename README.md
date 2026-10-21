@@ -88,7 +88,9 @@ cargos-alvo, repositórios de estudo, o que nunca citar) e peça ao Claude:
 "rode a vitrine".
 
 Para rodar todo dia sem pedir, use `agendamento/tarefa-diaria.md` como modelo
-de tarefa agendada.
+de tarefa agendada. A tarefa precisa rodar no computador onde fica o estado
+(no app desktop, "Exigir este computador"), e no fim envia as tabelas para o
+painel; sem esse passo o painel fica parado na última exportação manual.
 
 ## Painel
 
